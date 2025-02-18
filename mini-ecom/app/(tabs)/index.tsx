@@ -1,9 +1,8 @@
-import { Image, StyleSheet, FlatList, ActivityIndicator, Dimensions, Modal, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, FlatList, ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
 import { useEffect, useState } from 'react';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import PromoBanner from '../../components/ui/PromoBanner';
-import { StatusBar } from 'expo-status-bar';
 import CustomCarousel from '../../components/ui/CustomCarousel';
 import { useRouter } from 'expo-router';
 
@@ -45,8 +44,9 @@ export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
       
-        
+      <ThemedView>
       <CustomCarousel />
+      </ThemedView>  
       <ThemedView style={styles.container}>
         <ThemedText style={styles.header} type="subtitle">Beauty Products</ThemedText>
         {products.length === 0 ? (

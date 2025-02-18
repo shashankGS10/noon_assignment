@@ -7,9 +7,17 @@ import { useCartStore } from '@/hooks/useCartStore';
 
 const { width } = Dimensions.get('window');
 
+type Product = {
+  id: number;
+  title: string;
+  price: number;
+  description: string;
+  images: string[];
+};
+
 export default function ProductDetails() {
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState<Product | null>(null); // ✅ Define correct type
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { cart, addToCart, increaseQuantity, decreaseQuantity } = useCartStore();
@@ -29,7 +37,7 @@ export default function ProductDetails() {
         }
         return response.json();
       })
-      .then((data) => {
+      .then((data: Product) => { // ✅ Ensure correct type
         setProduct(data);
         setLoading(false);
       })

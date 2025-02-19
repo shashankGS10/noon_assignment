@@ -29,7 +29,7 @@ export default function HomeScreen() {
     return () => clearTimeout(timer);
   }, []);
 
-  const renderProduct = ({ item }) => (
+  const renderProduct = ({ item }: { item: { id: number; thumbnail: string; title: string; price: number; description: string } }) => (
     <TouchableOpacity
       style={styles.productCard}
       onPress={() => router.push(`/product/${item.id}`)} //navigate to product details

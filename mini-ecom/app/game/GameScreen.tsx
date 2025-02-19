@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,8 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
+import useGameStore from "@/hooks/useGameStore";
+
 
 const { width } = Dimensions.get("window");
 
@@ -29,26 +31,31 @@ const FIXED_IMPACT_ANGLE = 0; // World-angle at which the arrow always hits (0°
 const LOG_COLOR = "#CD853F";
 const ARROW_COLOR = "#A0522D";
 
-// Normalize an angle to 0–360°
-const normalizeAngle = (angle) => ((angle % 360) + 360) % 360;
-
-// Get minimal angular difference between two angles
-const angleDifference = (a, b) => {
+// Utility Functions
+const normalizeAngle = (angle: number) => ((angle % 360) + 360) % 360;
+const angleDifference = (a: number, b: number) => {
   let diff = Math.abs(a - b) % 360;
   return diff > 180 ? 360 - diff : diff;
 };
 
+// Zustand store for game state
+
+
 const GameScreen = () => {
-  const [score, setScore] = useState(0);
-  const [remainingArrows, setRemainingArrows] = useState(INITIAL_ARROWS);
-  // We record each arrow’s impact as a local angle (in degrees) on the log.
-  const [arrows, setArrows] = useState([]);
-  const [gameOver, setGameOver] = useState(false);
+  const {
+    score,
+    remainingArrows,
+    arrows,
+    gameOver,
+    addArrow,
+    incrementScore,
+    decrementArrows,
+    setGameOver,
+    reset,
+  } = useGameStore();
 
   // Log rotation shared value (in degrees)
   const rotation = useSharedValue(0);
-
-  // Start continuous rotation of the log.
   useEffect(() => {
     rotation.value = withRepeat(
       withTiming(360, { duration: ROTATION_SPEED, easing: Easing.linear }),
@@ -56,56 +63,43 @@ const GameScreen = () => {
     );
   }, []);
 
-  // Animated style for the log’s container (rotates continuously)
+  // Animated style for the rotating log
   const rotatingStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
-  // Collision detection: if the new impact position is too close to any previous one,
-  // then a collision has occurred.
-  const checkCollision = (newLocalAngle) => {
-    return arrows.some((existingAngle) => {
+  // Collision detection: if the new impact position is too close to any previous one, a collision occurs.
+  const checkCollision = (newLocalAngle: number) => {
+    return arrows.some((existingAngle: number) => {
       return angleDifference(existingAngle, newLocalAngle) < IMPACT_THRESHOLD;
     });
   };
 
-  // When the arrow is launched, it always travels along the y‑axis and hits the log
-  // at the fixed world impact angle (FIXED_IMPACT_ANGLE). However, because the log is
-  // rotating, the actual part of the log that meets the impact point is determined by
-  // the current rotation. We record that “local” impact angle as:
-  //  localImpactAngle = normalizeAngle(FIXED_IMPACT_ANGLE – currentLogRotation)
+  // Launch arrow: Calculate the impact location (local to the log) based on the current log rotation.
+  // Here, we use an OFFSET to adjust alignment if needed.
   const launchArrow = () => {
     const OFFSET = 180;
     if (remainingArrows > 0 && !gameOver) {
-      const newLocalAngle = normalizeAngle(FIXED_IMPACT_ANGLE - rotation.value + OFFSET);
-
-      
+      // Calculate local impact angle: this value represents the hit position on the log.
+      const newLocalAngle = normalizeAngle(
+        FIXED_IMPACT_ANGLE - rotation.value + OFFSET
+      );
       if (checkCollision(newLocalAngle)) {
         setGameOver(true);
         Alert.alert("Game Over!", "Arrow collision detected!", [
-          { text: "Restart", onPress: resetGame },
+          { text: "Restart", onPress: reset },
         ]);
       } else {
-        setArrows([...arrows, newLocalAngle]);
-        setScore((prev) => prev + 1);
-        setRemainingArrows((prev) => prev - 1);
-        
-        // Level complete condition (for example purposes, restart when all arrows are used)
+        addArrow(newLocalAngle);
+        incrementScore();
+        decrementArrows();
         if (remainingArrows === 1) {
           Alert.alert("Level Complete!", "Congratulations!", [
-            { text: "Next Level", onPress: resetGame },
+            { text: "Next Level", onPress: reset },
           ]);
         }
       }
     }
-  };
-
-  // Reset the game state
-  const resetGame = () => {
-    setScore(0);
-    setRemainingArrows(INITIAL_ARROWS);
-    setArrows([]);
-    setGameOver(false);
   };
 
   return (
@@ -122,16 +116,15 @@ const GameScreen = () => {
           <Animated.View style={[styles.logContainer, rotatingStyle]}>
             <View style={styles.log}>
               <View style={styles.innerLogDesign}>
-                {arrows.map((angle, index) => (
+                {arrows.map((angle: number, index: number) => (
                   <View
                     key={index}
                     style={[
                       styles.stuckArrow,
                       {
                         transform: [
-                          // Each arrow is drawn at its stored local impact angle.
+                          // Render each arrow at its stored local impact angle.
                           { rotate: `${angle}deg` },
-                          // Then translated outward so that its tip touches the log’s perimeter.
                           { translateY: -LOG_SIZE / 2 },
                         ],
                       },

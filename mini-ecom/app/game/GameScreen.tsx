@@ -6,6 +6,7 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   Alert,
+  Button,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -14,31 +15,24 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
+import { Audio } from "expo-av";
 import useGameStore from "@/hooks/useGameStore";
+import Arrow from "@/components/ui/Arrow";
 
+const { width, height } = Dimensions.get("window");
 
-const { width } = Dimensions.get("window");
-
-// Game Configurations
 const LOG_SIZE = width * 0.6;
 const ARROW_LENGTH = LOG_SIZE * 0.6;
-const INITIAL_ARROWS = 10;
-const IMPACT_THRESHOLD = 15; // Minimum angular difference (in degrees) to avoid collision
-const ROTATION_SPEED = 6000; // Duration for one full rotation (ms)
-const FIXED_IMPACT_ANGLE = 0; // World-angle at which the arrow always hits (0° = top)
-
-// Colors
+const IMPACT_THRESHOLD = 15;
+const FIXED_IMPACT_ANGLE = 0;
 const LOG_COLOR = "#CD853F";
 const ARROW_COLOR = "#A0522D";
 
-// Utility Functions
 const normalizeAngle = (angle: number) => ((angle % 360) + 360) % 360;
 const angleDifference = (a: number, b: number) => {
   let diff = Math.abs(a - b) % 360;
   return diff > 180 ? 360 - diff : diff;
 };
-
-// Zustand store for game state
 
 
 const GameScreen = () => {
@@ -52,40 +46,65 @@ const GameScreen = () => {
     decrementArrows,
     setGameOver,
     reset,
+    rotationSpeed,
+    level,
+    nextLevel,
+    highScore,
+    updateHighScore,
   } = useGameStore();
 
-  // Log rotation shared value (in degrees)
   const rotation = useSharedValue(0);
+
   useEffect(() => {
     rotation.value = withRepeat(
-      withTiming(360, { duration: ROTATION_SPEED, easing: Easing.linear }),
+      withTiming(360, { duration: rotationSpeed, easing: Easing.linear }),
       -1
     );
-  }, []);
+  }, [rotationSpeed]);
 
-  // Animated style for the rotating log
   const rotatingStyle = useAnimatedStyle(() => ({
     transform: [{ rotate: `${rotation.value}deg` }],
   }));
 
-  // Collision detection: if the new impact position is too close to any previous one, a collision occurs.
+  const playSound = async (soundFile: any) => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(soundFile);
+      await sound.playAsync();
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.error("Error playing sound:", error);
+    }
+  };
+
+  const playCollisionSound = async () => {
+    await playSound(require("@/assets/collision.wav"));
+  };
+
+  const arrowShootSound = async () => {
+    await playSound(require("@/assets/arrow_shoot.wav"));
+  };
+
   const checkCollision = (newLocalAngle: number) => {
     return arrows.some((existingAngle: number) => {
       return angleDifference(existingAngle, newLocalAngle) < IMPACT_THRESHOLD;
     });
   };
 
-  // Launch arrow: Calculate the impact location (local to the log) based on the current log rotation.
-  // Here, we use an OFFSET to adjust alignment if needed.
   const launchArrow = () => {
-    const OFFSET = 180;
+    const OFFSET = 175;
     if (remainingArrows > 0 && !gameOver) {
-      // Calculate local impact angle: this value represents the hit position on the log.
+      arrowShootSound();
       const newLocalAngle = normalizeAngle(
         FIXED_IMPACT_ANGLE - rotation.value + OFFSET
       );
       if (checkCollision(newLocalAngle)) {
         setGameOver(true);
+        playCollisionSound();
+        updateHighScore(score);
         Alert.alert("Game Over!", "Arrow collision detected!", [
           { text: "Restart", onPress: reset },
         ]);
@@ -95,7 +114,10 @@ const GameScreen = () => {
         decrementArrows();
         if (remainingArrows === 1) {
           Alert.alert("Level Complete!", "Congratulations!", [
-            { text: "Next Level", onPress: reset },
+            { text: "Next Level", onPress: () => {
+            nextLevel(level);
+            rotation.value = 0; 
+            }},
           ]);
         }
       }
@@ -105,45 +127,43 @@ const GameScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={launchArrow}>
       <View style={styles.container}>
-        {/* Game Stats */}
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>Score: {score}</Text>
-          <Text style={styles.infoText}>Arrows Left: {remainingArrows}</Text>
-        </View>
-
-        {/* Game Area */}
         <View style={styles.gameArea}>
           <Animated.View style={[styles.logContainer, rotatingStyle]}>
-            <View style={styles.log}>
-              <View style={styles.innerLogDesign}>
-                {arrows.map((angle: number, index: number) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.stuckArrow,
-                      {
-                        transform: [
-                          // Render each arrow at its stored local impact angle.
-                          { rotate: `${angle}deg` },
-                          { translateY: -LOG_SIZE / 2 },
-                        ],
-                      },
-                    ]}
-                  />
-                ))}
-              </View>
-            </View>
+            <Animated.Image
+              source={require("@/assets/images/woodenLog.png")}
+              style={styles.log}
+              resizeMode="contain"
+            />
+            {arrows.map((angle: number, index: number) => (
+              <Animated.View
+                key={index}
+                style={{
+                  position: "absolute",
+                  transform: [
+                    { rotate: `${angle}deg` },
+                    { translateY: -LOG_SIZE / 1.6 },
+                  ],
+                }}
+              >
+                <Arrow />
+              </Animated.View>
+            ))}
           </Animated.View>
         </View>
-
-        {/* Static Launcher Arrow to indicate the fixed impact point */}
         <View style={styles.launcherArea}>
-          <View style={styles.referenceArrow} />
+          <Arrow inverted={true} />
+        </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoText}>Score: {score}</Text>
+          <Text style={styles.infoText}>High Score: {highScore}</Text>
+          <Text style={styles.infoText}>Arrows Left: {remainingArrows}</Text>
+          <Button title="Reset Game" onPress={reset} color="#FF6347" />
         </View>
       </View>
     </TouchableWithoutFeedback>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -203,6 +223,10 @@ const styles = StyleSheet.create({
     height: ARROW_LENGTH,
     backgroundColor: ARROW_COLOR,
     borderRadius: 2,
+  },
+  trajectoryArrow: {
+    position: "absolute",
+    bottom: 0, // Start from bottom position
   },
 });
 

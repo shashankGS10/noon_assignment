@@ -7,6 +7,7 @@ import {
   TouchableWithoutFeedback,
   Alert,
   Button,
+  Image,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -106,7 +107,8 @@ const GameScreen = () => {
         playCollisionSound();
         updateHighScore(score);
         Alert.alert("Game Over!", "Arrow collision detected!", [
-          { text: "Restart", onPress: reset },
+          { text: "Restart", onPress: ()=>{setGameOver(false);
+            reset()} },
         ]);
       } else {
         addArrow(newLocalAngle);
@@ -156,8 +158,12 @@ const GameScreen = () => {
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>Score: {score}</Text>
           <Text style={styles.infoText}>High Score: {highScore}</Text>
-          <Text style={styles.infoText}>Arrows Left: {remainingArrows}</Text>
-          <Button title="Reset Game" onPress={reset} color="#FF6347" />
+          {/* I need to add arrow.png image */}
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={styles.infoText}>Arrows Left 🏹: {remainingArrows}</Text>
+          </View>
+          <Button title="Reset Game" onPress={()=>{setGameOver(false);
+            reset()}} color="#FF6347" />
         </View>
       </View>
     </TouchableWithoutFeedback>

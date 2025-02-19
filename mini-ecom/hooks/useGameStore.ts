@@ -73,8 +73,7 @@ const useGameStore = create<GameState>((set, get) => ({
             rotationSpeed: Math.max(MIN_ROTATION_SPEED, rotationSpeed - 500),
         });
     },
-
-    reset: () => {
+      reset: () => {
         const { highScore } = get();
         set({
             score: 0,
@@ -83,9 +82,11 @@ const useGameStore = create<GameState>((set, get) => ({
             gameOver: false,
             level: 1,
             rotationSpeed: INITIAL_ROTATION_SPEED,
-            highScore, // Preserve high score
+            highScore,
         });
     },
 }));
 
 export default useGameStore;
+
+

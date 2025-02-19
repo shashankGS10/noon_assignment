@@ -34,17 +34,10 @@ const Arrow: React.FC<ArrowProps> = ({ inverted = false }) => {
                 fill={ARROW_COLOR}
             />
             
-            {/* Feathers */}
             <Polygon
                 points={`0,0 5,${ARROW_LENGTH * 0.2} 10,0`}
                 fill={ARROW_FEATHERS_COLOR}
-            />
-            <Polygon
-                points={`0,${ARROW_LENGTH * 0.3} 5,${ARROW_LENGTH * 0.5} 10,${
-                    ARROW_LENGTH * 0.3
-                }`}
-                fill={ARROW_FEATHERS_COLOR}
-            />
+            />  
         </Svg>
     );
 };

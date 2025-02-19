@@ -24,7 +24,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setModalVisible(true);
-    }, 10000);//promotional modal timer
+    }, 5000);//promotional modal timer
 
     return () => clearTimeout(timer);
   }, []);

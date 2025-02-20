@@ -1,6 +1,6 @@
 ## BuyEasy ✅ E-Comm Application
 
-![Splash Screen](./ScreenShots/ss_1.jpeg)
+<img src="./ScreenShots/ss_1.jpeg" alt="Splash Screen" height="400"/>
 
 ### Overview
 The E-Comm application is a comprehensive e-commerce platform designed to provide users with a seamless shopping experience. Built using React Native, the application features a home screen with a banner slider, a product list fetched from a mock API, detailed product pages, and a fully functional shopping cart. The app is designed with user-friendly navigation and state management to ensure a smooth and engaging user experience.
@@ -8,19 +8,27 @@ The E-Comm application is a comprehensive e-commerce platform designed to provid
 ### Features
 
 #### Home Screen
-![Banner Screen](./ScreenShots/ss_2.jpeg)
+
+<img src="./ScreenShots/ss_2.jpeg" alt="Banner Screen" height="400"/>
+
 - **Banner Slider**: The home screen starts with a full-width banner slider that displays promotional images. This is implemented using a `FlatList` component with horizontal scrolling and auto-scroll functionality.
-![Product Screen](./ScreenShots/ss_3.jpeg)
+
+<img src="./ScreenShots/ss_3.jpeg" alt="Product Screen" height="400"/>
+
 - **Product List**: Below the banner slider, a list of products is displayed. Each product includes an image, name, price, and a brief 2-line description. The product data is fetched from a mock API and rendered using a `FlatList`.
 
-![Detail Screen](./ScreenShots/ss_4.jpeg)
 #### Product Details Screen
+
+<img src="./ScreenShots/ss_4.jpeg" alt="Product Details Screen" height="400"/>
+
 - **Product Carousel**: When a user taps on a product, they are navigated to a detailed product screen. This screen features a carousel of product images, implemented using a `FlatList` with paging enabled.
 - **Detailed Description**: The product details screen also includes a detailed description of the product, providing users with all the necessary information.
 - **Add to Cart**: An "Add to Cart" button allows users to add the product to their shopping cart. The button updates the cart state and provides feedback to the user.
 
-![Cart Screen](./ScreenShots/ss_5.jpeg)
 #### Shopping Cart Screen
+
+<img src="./ScreenShots/ss_5.jpeg" alt="Shopping Cart Screen" height="400"/>
+
 - **Cart Icon**: The shopping cart screen is accessible from the third tab in the bottom tab navigation. The cart tab icon displays the number of items currently in the cart, providing users with a quick overview of their cart status.
 - **Cart Management**: The cart screen allows users to view the products they have added to their cart. Users can increase or decrease the quantity of each product, or remove items entirely. This is managed using state hooks and the `useCartStore` custom hook.
 - **Total Price**: The total price of the items in the cart is displayed at the bottom of the screen. This is dynamically calculated based on the products and their quantities in the cart.
@@ -48,7 +56,9 @@ The E-Comm application is a comprehensive e-commerce platform designed to provid
 
 ## Overview
 GameScreen is an engaging arrow-shooting game built using React Native and Reanimated. The game revolves around a rotating log, and the objective is to shoot arrows onto it without colliding with existing arrows. If an arrow hits another, the game ends.
-![Game Screen](./ScreenShots/ss_7.jpeg)
+
+<img src="./ScreenShots/ss_7.jpeg" alt="Game Screen" height="400"/>
+
 ## Features
 - **Rotating Log**: The log continuously rotates, increasing the challenge.
 - **Arrow Shooting Mechanic**: Players tap to shoot arrows onto the log.

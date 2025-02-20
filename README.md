@@ -1,4 +1,4 @@
-## BuyEasy ✅ E-Comm Application
+## EasyBuy ✅ E-Comm Application
 
 <img src="./ScreenShots/ss_1.jpeg" alt="Splash Screen" height="400"/>
 
